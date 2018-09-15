@@ -20,12 +20,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from shlex import split as command
 from subprocess import Popen, PIPE
 
 from keepsake.util.safe_output import safe_output
 
 
 class Unlocker(object):
+
+    ROWS_SEPARATOR, COLS_SEPARATOR = "\n", "|"
+    ROWS_PADDING = 2  # header and separator
+    COLS_FIELDS = (
+        "auth_signature",
+        "jump_signature",
+        "scheme",
+        "ipv4",
+        "port",
+        "host",
+        "user",
+        "name",
+    )
 
     PROGRAM_NAME = "unlocker"
 
@@ -42,14 +56,21 @@ class Unlocker(object):
     OPT_LOOKUP = "lookup"
     OPT_RECALL = "recall"
 
+    SELF_BOUNCE = "~"
+
     class Error(Exception):
         pass
+
+    _term = "gnome-terminal -e '%s'"
+
+    _prog_unlock = "unlock %s %s"
+    _prog_lock = "lock"
 
     @classmethod
     @safe_output
     def list(cls):
-        proc = Popen([cls.PROGRAM_NAME, cls.OPT_LIST], stdout=PIPE)
-        output, error = proc.communicate()
+        cls._proc = Popen([cls.PROGRAM_NAME, cls.OPT_LIST], stdout=PIPE)
+        output, error = cls._proc.communicate()
         if error is not None:
             raise cls.Error(error)
         return output
@@ -68,9 +89,8 @@ class Unlocker(object):
         if jump is not None and len(jump) > 0:
             arguments.append("--jump-server")
             arguments.append(jump)
-        command = "gnome-terminal -e '%s'" % " ".join(arguments)
-        proc = Popen(command, shell=True)
-        output, error = proc.communicate()
+        cls._proc = Popen(command(cls._term % " ".join(arguments)))
+        output, error = cls._proc.communicate()
         if error is not None:
             raise cls.Error(error)
         return output
@@ -78,9 +98,8 @@ class Unlocker(object):
     @classmethod
     def remove(cls, name):
         arguments = [cls.PROGRAM_NAME, cls.OPT_REMOVE, "--name", unicode(name)]
-        command = "gnome-terminal -e '%s'" % " ".join(arguments)
-        proc = Popen(command, shell=True)
-        output, error = proc.communicate()
+        cls._proc = Popen(command(cls._term % " ".join(arguments)))
+        output, error = cls._proc.communicate()
         if error is not None:
             raise cls.Error(error)
         return output
@@ -92,11 +111,17 @@ class Unlocker(object):
         if jump is not None and len(jump) > 0:
             arguments.append("--jump-server")
             arguments.append(jump)
-        command = "gnome-terminal -e '%s'" % " ".join(arguments)
-        print command
-        proc = Popen(command, shell=True)
-        output, error = proc.communicate()
-        print output, error
+        cls._proc = Popen(command(cls._term % " ".join(arguments)))
+        output, error = cls._proc.communicate()
+        if error is not None:
+            raise cls.Error(error)
+        return output
+
+    @classmethod
+    def connect(cls, service, name):
+        cmd = cls._term % (cls._prog_unlock % (service, name))
+        cls._proc = Popen(cmd, shell=True)
+        output, error = cls._proc.communicate()
         if error is not None:
             raise cls.Error(error)
         return output

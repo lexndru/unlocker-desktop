@@ -1,6 +1,8 @@
 # Keepsake
 Keepsake is a GUI for Unlocker.
 
+## Icons
+https://github.com/pasnox/oxygen-icons-png
 
 ## License
 Copyright 2018 Alexandru Catrina

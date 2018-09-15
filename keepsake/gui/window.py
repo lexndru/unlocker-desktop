@@ -25,7 +25,7 @@ import wx
 
 FRAME_CONFIG = {
     "title": "Keepsake Desktop",
-    "size": (960, 440)
+    "size": (800, 440)
 }
 
 

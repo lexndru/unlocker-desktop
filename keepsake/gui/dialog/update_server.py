@@ -29,7 +29,7 @@ class UpdateServerDialog(wx.Dialog):
 
     last_server = None
 
-    def __init__(self, parent, name):
+    def __init__(self, parent, record):
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
         self.dlg.Create(parent, wx.ID_ANY, "Update authentication on server",
@@ -47,7 +47,7 @@ class UpdateServerDialog(wx.Dialog):
         pre_row.Add(name_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # set name input field
-        name_field = wx.TextCtrl(self, -1, name, size=(250, -1),
+        name_field = wx.TextCtrl(self, -1, record.name, size=(250, -1),
                                  style=wx.TE_READONLY)
         name_field.Disable()
         pre_row.Add(name_field, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
