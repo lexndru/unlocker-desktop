@@ -20,9 +20,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-from uuid import uuid4
+from distutils import spawn
+from os import path
+from os.path import expanduser
 
 
-def generate_random_name(limit=16):
-    name = str(uuid4().hex)
-    return name[:limit]
+class Boot(object):
+
+    def __init__(self):
+        self.keepsake_status = False
+        self.unlocker_status = False
+        self.unlocker_scripts = False
+        self.secrets_status = False
+        self.secrets_encryption = False
+
+    def __repr__(self):
+        return str({k: v for k, v in self.__dict__.iteritems() if k[0] != "_"})
+
+    def check_system(self):
+        self.keepsake_status = self.is_installed("keepsake-unlock")
+        self.unlocker_status = self.is_installed("unlocker")
+        self.unlocker_scripts = self.is_installed("unlock", "lock")
+        self.secrets_status = self.has_file(".secrets")
+        self.secrets_encryption = self.has_file(".secrets.lock")
+
+    def has_file(self, filename, dirname=".unlocker"):
+        return path.exists(path.join(expanduser("~"), dirname, filename))
+
+    def is_installed(self, *programs):
+        return all([spawn.find_executable(p) is not None for p in programs])

@@ -33,7 +33,12 @@ class SingleMainWindow(wx.Frame):
 
     def __init__(self, panel):
         super(self.__class__, self).__init__(parent=None, **FRAME_CONFIG)
-        self.panel = panel(self)
+        self.menubar = wx.MenuBar()
+        self.SetMenuBar(self.menubar)
         self.statusbar = self.CreateStatusBar()
+        self.panel = panel(self)
         self.Centre()
         self.Show()
+
+    def history(self, event_message):
+        self.statusbar.SetStatusText(event_message)

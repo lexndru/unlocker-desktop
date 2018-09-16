@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+from base64 import b64decode
+
 from keepsake.unlocker import Unlocker
 
 
@@ -33,7 +35,7 @@ class Records(object):
 
         @classmethod
         def fields(cls):
-            return {k:v for k, v in cls.__dict__.iteritems() if k[0] != "_"}
+            return {k: v for k, v in cls.__dict__.iteritems() if k[0] != "_"}
 
     def get_unlocker(self):
         return self._unlocker
@@ -124,6 +126,13 @@ class Records(object):
 
     def update_record(self, record, auth, jump=None):
         self._unlocker.update(record.name, auth, jump)
+
+    def decode_passkey(self, name):
+        try:
+            _, passkey = self._unlocker.passkey(name).split("\n", 2)
+        except Exception as e:
+            raise ValueError("Invalid passkey format: %s" % str(e))
+        return b64decode(passkey)
 
     def __repr__(self):
         return self.get_records()

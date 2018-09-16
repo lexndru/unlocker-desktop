@@ -23,3 +23,7 @@ lint:
 
 tests:
 	python -m unittest discover -v tests
+
+install: lint
+	python setup.py install
+	keepsake fix

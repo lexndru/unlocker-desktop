@@ -20,36 +20,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import sys
-
-from keepsake.bootloader import Boot
-
-from keepsake.gui.app import DesktopApp
-from keepsake.gui.window import SingleMainWindow
-from keepsake.gui.panel import CredentialsPanel
-
-from keepsake.util.misc import deploy_helper_script
+from os import path, chmod
+from os.path import expanduser
+from uuid import uuid4
 
 
-def main():
+KEEPSAKE_SCRIPT = """#!/bin/bash
 
-    # fix missing keepsake script
-    if len(sys.argv) > 1 and sys.argv[1] == "fix":
-        try:
-            print "Script deployed:", deploy_helper_script()
-        except Exception as e:
-            print "Failed to deploy:", str(e)
-        return  # force exit
+# connect to server
+unlock $1 $2
 
-    # scan current system
-    boot = Boot()
-    boot.check_system()
+# close window
+read -p "(press enter to close this window)" _
+"""
 
-    # register boot scan results
-    CredentialsPanel.register_boot(boot)
 
-    # initialize window frame with panel to display
-    SingleMainWindow(CredentialsPanel)
+def deploy_helper_script(script_name="keepsake-unlock"):
+    filepath = path.join(expanduser("~"), "bin", script_name)
+    if path.exists(filepath):
+        raise ValueError("Cannot continue: helper script is already deployed?")
+    with open(filepath, "w") as fd:
+        fd.write(KEEPSAKE_SCRIPT)
+    chmod(filepath, 0500)
+    return filepath
 
-    # run application
-    DesktopApp.run()
+
+def generate_random_name(limit=16):
+    name = str(uuid4().hex)
+    return name[:limit]

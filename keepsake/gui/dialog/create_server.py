@@ -23,7 +23,7 @@
 import wx
 
 from keepsake.util.server import ServerTemplate
-from keepsake.util.random import generate_random_name
+from keepsake.util.misc import generate_random_name
 
 from keepsake.gui.validator.alias import AliasValidator
 from keepsake.gui.validator.protocol import ProtocolValidator

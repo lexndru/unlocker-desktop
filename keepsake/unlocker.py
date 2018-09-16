@@ -42,6 +42,8 @@ class Unlocker(object):
     )
 
     PROGRAM_NAME = "unlocker"
+    SCRIPT_DECRYPT = "unlock"
+    SCRIPT_ENCRYPT = "lock"
 
     OPT_INSTALL = "install"
     OPT_MIGRATE = "migrate"
@@ -62,9 +64,7 @@ class Unlocker(object):
         pass
 
     _term = "gnome-terminal -e '%s'"
-
-    _prog_unlock = "unlock %s %s"
-    _prog_lock = "lock"
+    _bash = "bash -c '%s'"
 
     @classmethod
     @safe_output
@@ -118,10 +118,54 @@ class Unlocker(object):
         return output
 
     @classmethod
-    def connect(cls, service, name):
-        cmd = cls._term % (cls._prog_unlock % (service, name))
-        cls._proc = Popen(cmd, shell=True)
+    def migrate_export(cls, filename):
+        arguments = [cls.PROGRAM_NAME, cls.OPT_MIGRATE,
+                     "--export", ">", unicode(filename)]
+        cls._proc = Popen(cls._bash % " ".join(arguments), shell=True)
         output, error = cls._proc.communicate()
+        if error is not None:
+            raise cls.Error(error)
+        return output
+
+    @classmethod
+    def migrate_import(cls, filename):
+        arguments = [cls.PROGRAM_NAME, cls.OPT_MIGRATE,
+                     "--import", "<", unicode(filename)]
+        cls._proc = Popen(cls._bash % " ".join(arguments), shell=True)
+        output, error = cls._proc.communicate()
+        if error is not None:
+            raise cls.Error(error)
+        return output
+
+    @classmethod
+    def connect(cls, service, name):
+        cmd = "keepsake-unlock %s %s" % (service, name)
+        cls._proc = Popen(cls._term % cmd, shell=True)
+        output, error = cls._proc.communicate()
+        if error is not None:
+            raise cls.Error(error)
+        return output
+
+    @classmethod
+    def decrypt(cls):
+        cls._proc = Popen(cls._term % cls.SCRIPT_DECRYPT, shell=True)
+        output, error = cls._proc.communicate()
+        if error is not None:
+            raise cls.Error(error)
+        return output
+
+    @classmethod
+    def encrypt(cls):
+        cls._proc = Popen(cls._term % cls.SCRIPT_ENCRYPT, shell=True)
+        output, error = cls._proc.communicate()
+        if error is not None:
+            raise cls.Error(error)
+        return output
+
+    @classmethod
+    def passkey(cls, name):
+        cls._proc = Popen([cls.PROGRAM_NAME], stdin=PIPE, stdout=PIPE)
+        output, error = cls._proc.communicate(input=name)
         if error is not None:
             raise cls.Error(error)
         return output
