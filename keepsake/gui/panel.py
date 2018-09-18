@@ -60,11 +60,14 @@ class CredentialsPanel(wx.Panel):
     search = None
     toolbar = None
     list_view = None
+    detail_view = None
 
     records = None
     records_list = []
 
     encrypted = False
+
+    current_record = None
 
     def __init__(self, parent):
         super(self.__class__, self).__init__(parent=parent)
@@ -80,6 +83,7 @@ class CredentialsPanel(wx.Panel):
         top_sizer.Add(self.create_search(), 0, wx.TOP, 5)
         self.main_sizer.Add(top_sizer, 0, wx.EXPAND | wx.ALL, 1)
         self.main_sizer.Add(self.create_listview(), 1, wx.EXPAND | wx.ALL, 1)
+        self.main_sizer.Add(self.create_detailview(), 0, wx.ALL, 5)
         self.SetSizerAndFit(self.main_sizer)
         self.Show(True)
 
@@ -363,6 +367,8 @@ class CredentialsPanel(wx.Panel):
         self.menu_remove_server.Enable(True)
         self.menu_copy_server.Enable(True)
         self.menu_copy_passkey.Enable(True)
+        self.update_detailview()
+        self.Refresh()
 
     def copy_data(self, data):
         text_data = wx.TextDataObject()
@@ -396,19 +402,18 @@ class CredentialsPanel(wx.Panel):
         self.display_message("Cannot copy passkey to clipboard")
 
     def bind_context_menu(self, event):
-        copy_name = wx.NewId()
-        copy_host = wx.NewId()
-        copy_user = wx.NewId()
-        copy_passkey = wx.NewId()
-        self.Bind(wx.EVT_MENU, self.on_context_copy_name, id=copy_name)
-        self.Bind(wx.EVT_MENU, self.on_context_copy_host, id=copy_host)
-        self.Bind(wx.EVT_MENU, self.on_context_copy_user, id=copy_user)
-        self.Bind(wx.EVT_MENU, self.on_context_copy_passkey, id=copy_passkey)
         menu = wx.Menu()
-        menu.Append(copy_name, "Copy name")
-        menu.Append(copy_host, "Copy host")
-        menu.Append(copy_user, "Copy user")
-        menu.Append(copy_passkey, "Copy passkey")
+        connect_server = menu.Append(wx.ID_ANY, "Connect ...")
+        self.Bind(wx.EVT_MENU, self.bind_connect_button, connect_server)
+        menu.AppendSeparator()
+        copy_name = menu.Append(wx.ID_ANY, "Copy name")
+        self.Bind(wx.EVT_MENU, self.on_context_copy_name, copy_name)
+        copy_host = menu.Append(wx.ID_ANY, "Copy host")
+        self.Bind(wx.EVT_MENU, self.on_context_copy_host, copy_host)
+        copy_user = menu.Append(wx.ID_ANY, "Copy user")
+        self.Bind(wx.EVT_MENU, self.on_context_copy_user, copy_user)
+        copy_passkey = menu.Append(wx.ID_ANY, "Copy passkey")
+        self.Bind(wx.EVT_MENU, self.on_context_copy_passkey, copy_passkey)
         self.PopupMenu(menu)
 
     def bind_clear_search_button(self, event):
@@ -672,6 +677,92 @@ class CredentialsPanel(wx.Panel):
 
     def bind_documentation_menu(self, event):
         webbrowser.open(__homepage__, new=2)
+
+    def create_detailview(self):
+        sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # record details (name, bounce, connection hash)
+        st_record = wx.StaticBox(self, wx.ID_ANY, "Record details")
+        sb_record = wx.StaticBoxSizer(st_record, wx.VERTICAL)
+        sizer.Add(sb_record, 0, wx.EXPAND | wx.ALL, 5)
+
+        # connection details (protocol, host, ip, port, user)
+        st_connection = wx.StaticBox(self, wx.ID_ANY, "Connection details")
+        sb_connection = wx.StaticBoxSizer(st_connection, wx.VERTICAL)
+        sizer.Add(sb_connection, 0, wx.EXPAND | wx.ALL, 5)
+
+        # display record name
+        static = wx.StaticText(
+            self, wx.ID_ANY, "Name:", size=(100, -1), style=wx.ALIGN_RIGHT)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(static)
+        self.detail_record_name = wx.StaticText(
+            self, wx.ID_ANY, "n/a", size=(200, -1))
+        row.Add(self.detail_record_name)
+        sb_record.Add(row, 0, wx.EXPAND | wx.ALL, 2)
+
+        # display record hash
+        static = wx.StaticText(
+            self, wx.ID_ANY, "Hash:", size=(100, -1), style=wx.ALIGN_RIGHT)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(static)
+        self.detail_record_hash = wx.StaticText(
+            self, wx.ID_ANY, "n/a", size=(200, -1))
+        row.Add(self.detail_record_hash)
+        sb_record.Add(row, 0, wx.EXPAND | wx.ALL, 2)
+
+        # display record jump
+        static = wx.StaticText(
+            self, wx.ID_ANY, "Bounce:", size=(100, -1), style=wx.ALIGN_RIGHT)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(static)
+        self.detail_record_jump = wx.StaticText(
+            self, wx.ID_ANY, "n/a", size=(200, -1))
+        row.Add(self.detail_record_jump)
+        sb_record.Add(row, 0, wx.EXPAND | wx.ALL, 2)
+
+        # display connection protocol and port
+        static = wx.StaticText(
+            self, wx.ID_ANY, "Protocol:", size=(100, -1), style=wx.ALIGN_RIGHT)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(static)
+        self.detail_connection_protocol = wx.StaticText(
+            self, wx.ID_ANY, "n/a", size=(400, -1))
+        row.Add(self.detail_connection_protocol)
+        sb_connection.Add(row, 0, wx.EXPAND | wx.ALL, 2)
+
+        # display connection host and ip
+        static = wx.StaticText(
+            self, wx.ID_ANY, "Hostname:", size=(100, -1), style=wx.ALIGN_RIGHT)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(static)
+        self.detail_connection_hostname = wx.StaticText(
+            self, wx.ID_ANY, "n/a", size=(400, -1))
+        row.Add(self.detail_connection_hostname)
+        sb_connection.Add(row, 0, wx.EXPAND | wx.ALL, 2)
+
+        # display connection username
+        static = wx.StaticText(
+            self, wx.ID_ANY, "Username:", size=(100, -1), style=wx.ALIGN_RIGHT)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(static)
+        self.detail_connection_username = wx.StaticText(
+            self, wx.ID_ANY, "n/a", size=(400, -1))
+        row.Add(self.detail_connection_username)
+        sb_connection.Add(row, 0, wx.EXPAND | wx.ALL, 2)
+
+        return sizer
+
+    def update_detailview(self):
+        record = self.current_record
+        self.detail_record_name.SetLabel(record.name)
+        self.detail_record_hash.SetLabel(record.auth_signature)
+        self.detail_record_jump.SetLabel(record.jump_signature)
+        self.detail_connection_username.SetLabel(record.user)
+        hostname = "%s (%s)" % (record.host, record.ipv4)
+        self.detail_connection_hostname.SetLabel(hostname)
+        protocol = "%s (%s)" % (record.scheme, record.port)
+        self.detail_connection_protocol.SetLabel(protocol)
 
     @classmethod
     def register_boot(cls, boot):

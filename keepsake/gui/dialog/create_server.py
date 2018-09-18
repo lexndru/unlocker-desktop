@@ -95,11 +95,11 @@ class CreateServerDialog(wx.Dialog):
                        wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # create scheme label
-        scheme_label = wx.StaticText(self, -1, "Protocol:", size=(60, -1))
+        scheme_label = wx.StaticText(self, -1, "Protocol:", size=(65, -1))
         second_row.Add(scheme_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # create scheme input field
-        self.last_server.scheme = wx.TextCtrl(self, -1, "", size=(100, -1),
+        self.last_server.scheme = wx.TextCtrl(self, -1, "", size=(95, -1),
                                               validator=ProtocolValidator())
         second_row.Add(self.last_server.scheme, 0,
                        wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
