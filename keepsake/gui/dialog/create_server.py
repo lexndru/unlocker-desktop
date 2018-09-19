@@ -29,7 +29,10 @@ from keepsake.gui.validator.alias import AliasValidator
 from keepsake.gui.validator.protocol import ProtocolValidator
 from keepsake.gui.validator.username import UsernameValidator
 from keepsake.gui.validator.hostname import HostnameValidator
+from keepsake.gui.validator.jump import JumpServerValidator
 from keepsake.gui.validator.port import PortValidator
+
+from keepsake.gui.dialog.jump_server import JumpServerDialog
 
 
 class CreateServerDialog(wx.Dialog):
@@ -37,6 +40,7 @@ class CreateServerDialog(wx.Dialog):
     last_server = None
 
     def __init__(self, parent):
+        self.parent = parent
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
         self.dlg.Create(parent, wx.ID_ANY, "Add new server",
@@ -152,10 +156,18 @@ class CreateServerDialog(wx.Dialog):
         jump_label = wx.StaticText(self, -1, "Jump:", size=(50, -1))
         post_row.Add(jump_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
-        # create name input field
-        self.last_server.jump = wx.TextCtrl(self, -1, "", size=(250, -1))
+        # create jump input field
+        valid_servers = [s.auth_signature for s in self.parent.records_list]
+        jump_validator = JumpServerValidator(valid_servers)
+        self.last_server.jump = wx.TextCtrl(self, -1, "", size=(120, -1),
+                                            validator=jump_validator)
         post_row.Add(self.last_server.jump, 0,
                      wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        # create jump selector
+        jump_btn = wx.Button(self, -1, "Select ...", size=(120, -1))
+        jump_btn.Bind(wx.EVT_BUTTON, self.bind_select_jump_server)
+        post_row.Add(jump_btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # add post row
         sizer.Add(post_row, 0, wx.GROW | wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
@@ -191,3 +203,15 @@ class CreateServerDialog(wx.Dialog):
             self.last_server.auth = "privatekey"
         else:
             raise Exception("Unsupported auth option: %r" % event.GetInt())
+
+    def bind_select_jump_server(self, event):
+        dlg = JumpServerDialog(self)
+        dlg.CenterOnScreen()
+        val = dlg.ShowModal()
+        if val == wx.ID_OK:
+            server = dlg.selected_jump_server
+            if server is None:
+                self.parent.display_message("Cannot find server signature")
+            else:
+                self.last_server.jump.SetValue(server.auth_signature)
+        dlg.Destroy()

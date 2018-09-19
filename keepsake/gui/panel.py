@@ -84,6 +84,7 @@ class CredentialsPanel(wx.Panel):
         self.main_sizer.Add(top_sizer, 0, wx.EXPAND | wx.ALL, 1)
         self.main_sizer.Add(self.create_listview(), 1, wx.EXPAND | wx.ALL, 1)
         self.main_sizer.Add(self.create_detailview(), 0, wx.ALL, 5)
+        self.main_sizer.Add(wx.StaticLine(self, wx.ID_ANY), 0, wx.EXPAND, 1)
         self.SetSizerAndFit(self.main_sizer)
         self.Show(True)
 

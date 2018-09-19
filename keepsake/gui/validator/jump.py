@@ -21,18 +21,16 @@
 # THE SOFTWARE.
 
 import wx
-import re
 
-CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_"
+CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 
-class UsernameValidator(wx.PyValidator):
+class JumpServerValidator(wx.PyValidator):
 
-    valid_format = re.compile(r"^[\w]{2,63}$", re.I | re.U)
-
-    def __init__(self):
+    def __init__(self, servers):
         wx.PyValidator.__init__(self)
         self.Bind(wx.EVT_CHAR, self.OnChar)
+        self.servers = servers
 
     def TransferToWindow(self):
         return True  # Prevent wxDialog from complaining.
@@ -41,14 +39,14 @@ class UsernameValidator(wx.PyValidator):
         return True  # Prevent wxDialog from complaining.
 
     def Clone(self):
-        return UsernameValidator()
+        return JumpServerValidator(self.servers)
 
     def Validate(self, win):
         tc = self.GetWindow()
-        if self.valid_format.match(tc.GetValue()) is None:
-            error = "You have typed some invalid characters for username. " \
+        if tc.GetValue() not in self.servers:
+            error = "You have typed an invalid jump server. " \
                     "Please correct these errors before saving"
-            wx.MessageBox(error, "Invalid username")
+            wx.MessageBox(error, "Invalid jump server")
             tc.SetBackgroundColour("pink")
             tc.SetFocus()
             tc.Refresh()

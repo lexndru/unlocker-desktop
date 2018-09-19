@@ -32,7 +32,7 @@ class HostnameValidator(wx.PyValidator):
 
     valid_format = re.compile(PATTERN, re.I | re.U)
 
-    def __init__(self, flag=None):
+    def __init__(self):
         wx.PyValidator.__init__(self)
         self.Bind(wx.EVT_CHAR, self.OnChar)
 
