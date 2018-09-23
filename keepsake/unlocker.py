@@ -118,9 +118,9 @@ class Unlocker(object):
         return output
 
     @classmethod
-    def migrate_export(cls, filename):
+    def migrate_export(cls, filename, servers):
         arguments = [cls.PROGRAM_NAME, cls.OPT_MIGRATE,
-                     "--export", ">", unicode(filename)]
+                     "--export", " ".join(servers), ">", unicode(filename)]
         cls._proc = Popen(cls._bash % " ".join(arguments), shell=True)
         output, error = cls._proc.communicate()
         if error is not None:

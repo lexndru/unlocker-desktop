@@ -30,6 +30,7 @@ from keepsake import __project__, __homepage__, __version__, __license__
 
 from keepsake.gui.dialog.create_server import CreateServerDialog
 from keepsake.gui.dialog.update_server import UpdateServerDialog
+from keepsake.gui.dialog.preferences import PreferencesDialog
 
 from keepsake.gui.misc.records import Records
 from keepsake.gui.misc.scripts import Scripts
@@ -55,7 +56,7 @@ class CredentialsPanel(wx.Panel):
         ("Name", 160),
     )
 
-    lookup_fields = ("name", "host", "user", "scheme")
+    lookup_fields = ("name", "host", "user", "scheme", "auth_signature")
 
     search = None
     toolbar = None
@@ -89,7 +90,7 @@ class CredentialsPanel(wx.Panel):
         self.Show(True)
 
     def get_icon(self, name):
-        return os.path.join(__project__, "icons/{}.png".format(name))
+        return os.path.join(__project__, "icons", "{}.png".format(name))
 
     def set_boottime_alerts(self):
         problems = len(self.notice_messages)
@@ -131,8 +132,10 @@ class CredentialsPanel(wx.Panel):
         self.parent.Bind(wx.EVT_MENU, self.bind_import_button, import_servers)
 
         # export servers
-        export_servers = file_menu.Append(wx.ID_ANY, "&Export ...")
-        self.parent.Bind(wx.EVT_MENU, self.bind_export_button, export_servers)
+        export_any = file_menu.Append(wx.ID_ANY, "&Export ...")
+        self.parent.Bind(wx.EVT_MENU, self.bind_export_any_button, export_any)
+        export_all = file_menu.Append(wx.ID_ANY, "E&xport all")
+        self.parent.Bind(wx.EVT_MENU, self.bind_export_all_button, export_all)
         file_menu.AppendSeparator()
 
         # quit
@@ -189,6 +192,12 @@ class CredentialsPanel(wx.Panel):
         # refresh
         refresh_list = edit_menu.Append(wx.ID_ANY, "Refresh ...\tCtrl-R")
         self.parent.Bind(wx.EVT_MENU, self.bind_refresh_button, refresh_list)
+        edit_menu.AppendSeparator()
+
+        # preferences
+        preferences = edit_menu.Append(wx.ID_ANY, "Preferences\tCtrl-P")
+        self.parent.Bind(
+            wx.EVT_MENU, self.bind_preferences_button, preferences)
 
         return edit_menu
 
@@ -282,7 +291,7 @@ class CredentialsPanel(wx.Panel):
         if record.jump_signature != self.records.get_unlocker().SELF_BOUNCE:
             bounce = "Yes"
         self.list_view.SetStringItem(idx, 1, bounce)
-        service = "{} ({})".format(record.port, record.scheme)
+        service = "{} ({})".format(record.scheme, record.port)
         self.list_view.SetStringItem(idx, 2, service)
         self.list_view.SetStringItem(idx, 3, record.host)
         self.list_view.SetStringItem(idx, 4, record.user)
@@ -337,7 +346,8 @@ class CredentialsPanel(wx.Panel):
         self.Bind(wx.EVT_TOOL, self.bind_update_button, self.update_record)
         self.Bind(wx.EVT_TOOL, self.bind_refresh_button, self.refresh_view)
         self.Bind(wx.EVT_TOOL, self.bind_import_button, self.import_records)
-        self.Bind(wx.EVT_TOOL, self.bind_export_button, self.export_records)
+        self.Bind(
+            wx.EVT_TOOL, self.bind_export_any_button, self.export_records)
         self.Bind(wx.EVT_TOOL, self.bind_encrypt_button, self.encrypt_records)
         self.Bind(wx.EVT_TOOL, self.bind_decrypt_button, self.decrypt_records)
         self.toolbar.EnableTool(self.connect_server.GetId(), False)
@@ -421,6 +431,19 @@ class CredentialsPanel(wx.Panel):
         self.clear_listview()
         self.reinitialize()
         self.populate_listview()
+
+    def bind_preferences_button(self, event):
+        pref = PreferencesDialog(self)
+        pref.CenterOnScreen()
+        val = pref.ShowModal()
+        if val == wx.ID_OK:
+            style = wx.PD_APP_MODAL | wx.PD_AUTO_HIDE
+            dlg = wx.ProgressDialog("Please wait", "Saving preferences...",
+                                    maximum=5, parent=self, style=style)
+            wx.MilliSleep(250)
+            wx.Yield()
+            dlg.Destroy()
+        pref.Destroy()
 
     def bind_search_button(self, event):
         search = self.search.GetValue().strip()
@@ -516,14 +539,15 @@ class CredentialsPanel(wx.Panel):
 
     def bind_update_button(self, event):
         record = self.current_record
-        dlg = UpdateServerDialog(self, record)
+        dlg = UpdateServerDialog(self, record.name)
         dlg.CenterOnScreen()
         val = dlg.ShowModal()
         if val == wx.ID_OK:
             if dlg.last_server.auth is None:
                 dlg.last_server.auth = "password"
             try:
-                self.records.update_record(record, dlg.last_server.auth)
+                jump = dlg.last_server.jump.GetValue()
+                self.records.update_record(record, dlg.last_server.auth, jump)
                 self.parent.history("Record %s updated ..." % record.name)
             except Exception as e:
                 self.display_message("Cannot continue due to an error: %s" % e)
@@ -561,7 +585,56 @@ class CredentialsPanel(wx.Panel):
         if message:
             self.parent.history(message)
 
-    def bind_export_button(self, event):
+    def bind_export_any_button(self, event):
+        servers = [s.name for s in self.records_list]
+        dlg = wx.MultiChoiceDialog(
+            self, "Choose servers to export", "Export ...", servers)
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        selections = dlg.GetSelections()
+        dlg.Destroy()
+        export_servers = [self.records_list[i] for i in selections]
+        if len(export_servers) == 0:
+            dialog = wx.MessageBox(
+                "You haven't selected any servers to export.\nTry again.",
+                "Export servers", wx.OK | wx.ICON_INFORMATION)
+            return
+        missing_jumps = []
+        for each in export_servers:
+            jump = each.jump_signature
+            if jump == "~":
+                continue
+            if not any([s.auth_signature == jump for s in export_servers]):
+                missing_jumps.append(each)
+        if len(missing_jumps) > 0:
+            dialog = wx.MessageBox(
+                "You have selected servers that bounce from other " \
+                "servers. Do you want to append jump servers as well " \
+                "in the final export?",
+                "Export servers", wx.YES_NO | wx.ICON_INFORMATION)
+            if dialog == wx.YES:
+                for each in missing_jumps:
+                    for server in self.records_list:
+                        if each.jump_signature == server.auth_signature:
+                            export_servers.append(server)
+                            missing_jumps.remove(each)
+                if len(missing_jumps) != 0:
+                    dialog = wx.MessageBox(
+                        "Unable to find jump servers. " \
+                        "Export might be corrupted.",
+                        "Export fix failed", wx.OK | wx.ICON_INFORMATION)
+        self.on_export_callback(export_servers)
+
+    def bind_export_all_button(self, event):
+        self.on_export_callback(self.records_list)
+
+    def on_export_callback(self, export_servers):
+        dialog = wx.MessageBox(
+            "Preparing to export %d selected server(s).\nDo you " \
+            "want to save the export to disk?" % len(export_servers),
+            "Export servers", wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
+        if dialog != wx.YES:
+            return  # stop
         files = "|".join(self.unlocker_files)
         dlg = wx.FileDialog(
             self, message="Save file as ...", defaultDir=os.getcwd(),
@@ -570,8 +643,11 @@ class CredentialsPanel(wx.Panel):
         message = ""
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
+            if not "." in filepath:
+                filepath += ".unl"
             try:
-                self.records.get_unlocker().migrate_export(filepath)
+                self.records.get_unlocker().migrate_export(
+                    filepath, [s.name for s in export_servers])
                 message = "Successfully exported %s" % filepath
             except Exception as e:
                 message = "Failed to export: %s" % str(e)

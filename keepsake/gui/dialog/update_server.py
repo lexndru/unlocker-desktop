@@ -24,12 +24,17 @@ import wx
 
 from keepsake.util.server import ServerTemplate
 
+from keepsake.gui.dialog.jump_server import JumpServerDialog
+
+from keepsake.gui.validator.jump import JumpServerValidator
+
 
 class UpdateServerDialog(wx.Dialog):
 
     last_server = None
 
-    def __init__(self, parent, record):
+    def __init__(self, parent, record_name):
+        self.parent = parent
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
         self.dlg.Create(parent, wx.ID_ANY, "Update authentication on server",
@@ -37,6 +42,7 @@ class UpdateServerDialog(wx.Dialog):
                         style=wx.DEFAULT_DIALOG_STYLE)
         self.PostCreate(self.dlg)
         self.last_server = ServerTemplate()
+        self.record_name = record_name
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         # sizer for the server name
@@ -47,7 +53,7 @@ class UpdateServerDialog(wx.Dialog):
         pre_row.Add(name_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # set name input field
-        name_field = wx.TextCtrl(self, -1, record.name, size=(250, -1),
+        name_field = wx.TextCtrl(self, -1, record_name, size=(250, -1),
                                  style=wx.TE_READONLY)
         name_field.Disable()
         pre_row.Add(name_field, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
@@ -81,10 +87,18 @@ class UpdateServerDialog(wx.Dialog):
         jump_label = wx.StaticText(self, -1, "Jump:", size=(50, -1))
         post_row.Add(jump_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
-        # create name input field
-        self.last_server.jump = wx.TextCtrl(self, -1, "", size=(250, -1))
+        # create jump input field
+        valid_servers = [s.auth_signature for s in self.parent.records_list]
+        jump_validator = JumpServerValidator(valid_servers)
+        self.last_server.jump = wx.TextCtrl(self, -1, "", size=(120, -1),
+                                            validator=jump_validator)
         post_row.Add(self.last_server.jump, 0,
                      wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+
+        # create jump selector
+        jump_btn = wx.Button(self, -1, "Select ...", size=(120, -1))
+        jump_btn.Bind(wx.EVT_BUTTON, self.bind_select_jump_server)
+        post_row.Add(jump_btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # add post row
         sizer.Add(post_row, 0, wx.GROW | wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
@@ -120,3 +134,15 @@ class UpdateServerDialog(wx.Dialog):
             self.last_server.auth = "privatekey"
         else:
             raise Exception("Unsupported auth option: %r" % event.GetInt())
+
+    def bind_select_jump_server(self, event):
+        dlg = JumpServerDialog(self, record_name=self.record_name)
+        dlg.CenterOnScreen()
+        val = dlg.ShowModal()
+        if val == wx.ID_OK:
+            server = dlg.selected_jump_server
+            if server is None:
+                self.parent.display_message("Cannot find server signature")
+            else:
+                self.last_server.jump.SetValue(server.auth_signature)
+        dlg.Destroy()

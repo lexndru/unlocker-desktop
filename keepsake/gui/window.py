@@ -36,7 +36,7 @@ class SingleMainWindow(wx.Frame):
 
     def __init__(self, panel):
         super(self.__class__, self).__init__(parent=None, **FRAME_CONFIG)
-        self.set_icon(os.path.join(__project__, "icons/app-icon.png"))
+        self.set_icon(os.path.join(__project__, "icons", "app-icon.png"))
         self.menubar = wx.MenuBar()
         self.SetMinSize(self.GetSize())
         self.SetMenuBar(self.menubar)

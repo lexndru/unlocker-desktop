@@ -21,55 +21,72 @@
 # THE SOFTWARE.
 
 import wx
-import sys
 
 
-class JumpServerDialog(wx.Dialog):
+class PreferencesDialog(wx.Dialog):
 
-    selected_jump_server = None
+    unlocker_versions = [
+        "v2.2.0"
+    ]
 
-    headers = (
-        ("Name", 180),
-        ("User", 140),
-        ("Host", 180),
-        ("Port", 60),
-    )
+    terminals = [
+        "XTerm",
+        "GNOME Terminal",
+        "Konsole",
+        "Terminator",
+        "Guake",
+        "Tilda",
+    ]
 
-    def __init__(self, parent, record_name=None):
+    shells = [
+        "sh",
+        "bash",
+        "tcsh",
+        "ksh",
+        "csh",
+        "zsh",
+    ]
+
+    def __init__(self, parent):
         self.parent = parent
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.dlg.Create(parent, wx.ID_ANY, "Choose jump server",
-                        pos=wx.DefaultPosition, size=(300, 500),
+        self.dlg.Create(parent, wx.ID_ANY, "Preferences",
+                        pos=wx.DefaultPosition, size=(300, 300),
                         style=wx.DEFAULT_DIALOG_STYLE)
         self.PostCreate(self.dlg)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # create label
-        if record_name is None:
-            record_name = self.parent.last_server.get_name()
-        text_title = "Select a jump server for %s" % record_name
-        title = wx.StaticText(self, -1, text_title, size=(300, -1))
-        sizer.Add(title, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        # unlocker version
+        unlocker_label = wx.StaticText(self, -1, "Unlocker:", size=(100, -1))
+        unlocker = wx.Choice(
+            self, wx.ID_ANY, choices=self.unlocker_versions, size=(200, -1))
+        unlocker.SetSelection(0)
+        unlocker.Enable(False)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(unlocker_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        row.Add(unlocker, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        sizer.Add(row, 0,  wx.ALL, 5)
 
-        # add list of servers
-        self.servers = []
-        jump_list = wx.ListCtrl(self, style=wx.LC_REPORT | wx.BORDER_SUNKEN)
-        sizer.Add(jump_list, 1, wx.EXPAND | wx.ALL, 5)
-        for idx, header in enumerate(self.headers):
-            name, width = header
-            jump_list.InsertColumn(idx, name, wx.LIST_FORMAT_CENTER)
-            jump_list.SetColumnWidth(idx, width)
-        jump_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_item_selected)
-        for record in self.parent.parent.records_list:
-            if record.scheme != "ssh":
-                continue
-            idx = jump_list.InsertStringItem(sys.maxint, record.name)
-            jump_list.SetStringItem(idx, 0, record.name)
-            jump_list.SetStringItem(idx, 1, record.user)
-            jump_list.SetStringItem(idx, 2, record.host)
-            jump_list.SetStringItem(idx, 3, record.port)
-            self.servers.append(record)
+        # terminal
+        terminal_label = wx.StaticText(self, -1, "Terminal:", size=(100, -1))
+        terminal = wx.Choice(
+            self, wx.ID_ANY, choices=self.terminals, size=(200, -1))
+        terminal.SetSelection(1)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(terminal_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        row.Add(terminal, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        sizer.Add(row, 0,  wx.ALL, 5)
+
+        # shell
+        shell_label = wx.StaticText(self, -1, "Shell:", size=(100, -1))
+        shell = wx.Choice(
+            self, wx.ID_ANY, choices=self.shells, size=(200, -1))
+        shell.SetSelection(1)
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(shell_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        row.Add(shell, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        sizer.Add(row, 0, wx.ALL, 5)
 
         # buttons sizer
         btn_sizer = wx.StdDialogButtonSizer()
@@ -90,6 +107,3 @@ class JumpServerDialog(wx.Dialog):
         # render dialog
         self.SetSizer(sizer)
         sizer.Fit(self)
-
-    def on_item_selected(self, event):
-        self.selected_jump_server = self.servers[event.GetIndex()]
