@@ -27,7 +27,7 @@ from keepsake import __project__
 
 FRAME_CONFIG = {
     "title": "Keepsake Desktop",
-    "size": (800, 440),
+    "size": (860, 440),
     # "style": wx.SYSTEM_MENU | wx.CLOSE_BOX | wx.CAPTION
 }
 

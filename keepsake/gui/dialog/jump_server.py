@@ -61,7 +61,7 @@ class JumpServerDialog(wx.Dialog):
             jump_list.InsertColumn(idx, name, wx.LIST_FORMAT_CENTER)
             jump_list.SetColumnWidth(idx, width)
         jump_list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_item_selected)
-        for record in self.parent.parent.records_list:
+        for record in self.parent.panel.get_servers():
             if record.scheme != "ssh":
                 continue
             idx = jump_list.InsertStringItem(sys.maxint, record.name)

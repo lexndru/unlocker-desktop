@@ -47,11 +47,11 @@ class PreferencesDialog(wx.Dialog):
         "zsh",
     ]
 
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self, panel):
+        self.panel = panel
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.dlg.Create(parent, wx.ID_ANY, "Preferences",
+        self.dlg.Create(panel, wx.ID_ANY, "Preferences",
                         pos=wx.DefaultPosition, size=(300, 300),
                         style=wx.DEFAULT_DIALOG_STYLE)
         self.PostCreate(self.dlg)

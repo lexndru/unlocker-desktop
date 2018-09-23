@@ -39,11 +39,11 @@ class CreateServerDialog(wx.Dialog):
 
     last_server = None
 
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self, panel):
+        self.panel = panel
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.dlg.Create(parent, wx.ID_ANY, "Add new server",
+        self.dlg.Create(panel, wx.ID_ANY, "Add new server",
                         pos=wx.DefaultPosition, size=(300, 200),
                         style=wx.DEFAULT_DIALOG_STYLE)
         self.PostCreate(self.dlg)
@@ -157,7 +157,7 @@ class CreateServerDialog(wx.Dialog):
         post_row.Add(jump_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # create jump input field
-        valid_servers = [s.auth_signature for s in self.parent.records_list]
+        valid_servers = [s.auth_signature for s in self.panel.get_servers()]
         jump_validator = JumpServerValidator(valid_servers)
         self.last_server.jump = wx.TextCtrl(self, -1, "", size=(120, -1),
                                             validator=jump_validator)
@@ -211,7 +211,10 @@ class CreateServerDialog(wx.Dialog):
         if val == wx.ID_OK:
             server = dlg.selected_jump_server
             if server is None:
-                self.parent.display_message("Cannot find server signature")
+                self.panel.display_message("Cannot find server signature")
             else:
                 self.last_server.jump.SetValue(server.auth_signature)
         dlg.Destroy()
+
+    def get_results(self):
+        return self.last_server

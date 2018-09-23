@@ -108,6 +108,7 @@ class Records(object):
 
     def append_record(self, name, host, port, user, auth, scheme, jump=None):
         self._unlocker.append(name, host, port, user, auth, scheme, jump)
+        self_bounce = self._unlocker.SELF_BOUNCE
         return type(self.Row.__name__, (self.Row,), {
             "name": name,
             "host": host,
@@ -116,7 +117,7 @@ class Records(object):
             "ipv4": "?",
             "scheme": scheme,
             "auth_signature": "?",
-            "jump_signature": "Yes" if jump is not None else "No"
+            "jump_signature": self_bounce if len(jump) == 0 else "?"
         })
 
     def remove_record(self, record):
@@ -135,4 +136,4 @@ class Records(object):
         return b64decode(passkey)
 
     def __repr__(self):
-        return self.get_records()
+        return str(self.get_records())

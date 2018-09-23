@@ -23,6 +23,8 @@
 from os import path, chmod
 from os.path import expanduser
 from uuid import uuid4
+from shlex import split as command
+from subprocess import Popen, PIPE
 
 
 KEEPSAKE_SCRIPT = """#!/bin/bash
@@ -48,3 +50,22 @@ def deploy_helper_script(script_name="keepsake-unlock"):
 def generate_random_name(limit=16):
     name = str(uuid4().hex)
     return name[:limit]
+
+
+def spawn_process(*cmd, **opts):
+    if len(cmd) == 0:
+        raise ValueError("Nothing to run")
+    arguments = command(" ".join(cmd))
+    proc = Popen(arguments, **opts)
+    return proc.communicate()
+
+
+def spawn_piped_process(*cmd, **opts):
+    stdin = opts.get("stdin")
+    if stdin is None:
+        raise ValueError("Nothing to stream to process")
+    if len(cmd) == 0:
+        raise ValueError("Nothing to run")
+    arguments = command(" ".join(cmd))
+    proc = Popen(arguments, stdin=PIPE, stdout=PIPE)
+    return proc.communicate(input=stdin)

@@ -34,7 +34,7 @@ class UpdateServerDialog(wx.Dialog):
     last_server = None
 
     def __init__(self, parent, record_name):
-        self.parent = parent
+        self.panel = parent
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
         self.dlg.Create(parent, wx.ID_ANY, "Update authentication on server",
@@ -88,7 +88,7 @@ class UpdateServerDialog(wx.Dialog):
         post_row.Add(jump_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         # create jump input field
-        valid_servers = [s.auth_signature for s in self.parent.records_list]
+        valid_servers = [s.auth_signature for s in self.panel.get_servers()]
         jump_validator = JumpServerValidator(valid_servers)
         self.last_server.jump = wx.TextCtrl(self, -1, "", size=(120, -1),
                                             validator=jump_validator)
@@ -146,3 +146,9 @@ class UpdateServerDialog(wx.Dialog):
             else:
                 self.last_server.jump.SetValue(server.auth_signature)
         dlg.Destroy()
+
+    def get_results(self):
+        return self.last_server
+
+    def get_jump_server(self):
+        return self.last_server.jump.GetValue()

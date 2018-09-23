@@ -43,7 +43,8 @@ class JumpServerValidator(wx.PyValidator):
 
     def Validate(self, win):
         tc = self.GetWindow()
-        if tc.GetValue() not in self.servers:
+        value = tc.GetValue()
+        if len(value) > 0 and value not in self.servers:
             error = "You have typed an invalid jump server. " \
                     "Please correct these errors before saving"
             wx.MessageBox(error, "Invalid jump server")
