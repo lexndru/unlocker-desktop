@@ -57,8 +57,6 @@ class MainMenu(object):
         # add server
         self.menu_new_server = file_menu.Append(
             wx.ID_ANY, "&New connection\tCtrl-N")
-        if self.bootloader.secrets_encryption:
-            self.menu_new_server.Enable(False)
         self.panel.Bind(
             wx.EVT_MENU, self.event.bind_add_button, self.menu_new_server)
         file_menu.AppendSeparator()
@@ -80,6 +78,13 @@ class MainMenu(object):
         # quit
         quit_app = file_menu.Append(wx.ID_ANY, "&Quit\tCtrl-Q")
         self.panel.Bind(wx.EVT_MENU, self.event.bind_quit, quit_app)
+
+        # disable options while encryption is on
+        if self.bootloader.secrets_encryption:
+            self.menu_new_server.Enable(False)
+            self.menu_export_any.Enable(False)
+            self.menu_export_all.Enable(False)
+            self.menu_import_servers.Enable(False)
 
         return file_menu
 

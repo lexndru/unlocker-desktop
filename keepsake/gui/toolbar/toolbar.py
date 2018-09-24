@@ -105,8 +105,13 @@ class Toolbar(object):
         if self.bootloader.secrets_encryption:
             self.toolbar.EnableTool(self.encrypt_records.GetId(), False)
             self.toolbar.EnableTool(self.add_record.GetId(), False)
+            self.toolbar.EnableTool(self.import_records.GetId(), False)
+            self.toolbar.EnableTool(self.export_records.GetId(), False)
         else:
             self.toolbar.EnableTool(self.decrypt_records.GetId(), False)
+            self.toolbar.EnableTool(self.add_record.GetId(), True)
+            self.toolbar.EnableTool(self.import_records.GetId(), True)
+            self.toolbar.EnableTool(self.export_records.GetId(), True)
         self.toolbar.Realize()
         return hsizer
 

@@ -39,6 +39,8 @@ class CredentialsPanel(wx.Panel):
 
     bootloader = None
 
+    notice_messages = []
+
     @classmethod
     def register_boot(cls, boot):
         cls.bootloader = boot
@@ -46,6 +48,7 @@ class CredentialsPanel(wx.Panel):
     def __init__(self, parent):
         super(self.__class__, self).__init__(parent=parent)
         self.parent = parent
+        self.check_boot_alerts() and self.trigger_boot_alerts()
         self.event_broker = self.init_live_events()
         self.toolbar = self.init_toolbar()
         self.scripts = self.init_scripts()
@@ -118,3 +121,34 @@ class CredentialsPanel(wx.Panel):
 
     def history(self, *messages):
         self.parent.history(" ".join(messages))
+
+    def check_boot_alerts(self):
+        if self.bootloader.secrets_encryption:
+            notice = "Keepsake cannot access encrypted data! " \
+                     "Please decrypt first and then refresh records list."
+            self.notice_messages.append(notice)
+        elif not self.bootloader.secrets_status:
+            notice = "Keepsake cannot find data! Maybe initialize first?"
+            self.notice_messages.append(notice)
+        if not self.bootloader.keepsake_status:
+            notice = "Keepsake helper scripts are not deployed! " \
+                     "Reinstalling may fix this, otherwise open " \
+                     "a terminal and \"keepsake fix\"."
+            self.notice_messages.append(notice)
+        if not self.bootloader.unlocker_status:
+            notice = "Keepsake requires Unlocker to be installed! " \
+                     "Open a terminal and \"pip install unlocker\""
+            self.notice_messages.append(notice)
+        if not self.bootloader.unlocker_scripts:
+            notice = "Keepsake requires Unlocker scripts to be deployed! " \
+                     "Open a terminal and \"unlocker install\""
+            self.notice_messages.append(notice)
+        return len(self.notice_messages) > 0
+
+    def trigger_boot_alerts(self):
+        problems = len(self.notice_messages)
+        notice = "Found %d problem(s) during bootload:" % problems
+        for msg in self.notice_messages:
+            notice += "\n- %s" % msg
+        self.display_message(notice)
+        self.parent.history("%s ..." % notice[:-1])
