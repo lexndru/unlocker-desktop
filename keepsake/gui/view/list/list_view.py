@@ -26,6 +26,8 @@ import wx.dataview as dv
 
 class ListView(object):
 
+    DEFAULT_INDEX = -1
+
     event = None
 
     list_headers = (
@@ -47,7 +49,7 @@ class ListView(object):
         self.panel = panel
         self.list_view = None
         self.list_data = {}
-        self.index = 0
+        self.last_index = self.DEFAULT_INDEX
         self.prepare()
         self.refresh()
 
@@ -63,22 +65,29 @@ class ListView(object):
         self.list_view.Bind(dv.EVT_DATAVIEW_ITEM_CONTEXT_MENU,
                             self.event.bind_context_menu)
 
+    def get_current_row(self):
+        return self.list_view.GetSelectedRow()
+
     def clear(self):
-        data = self.list_data.copy()
-        for each in data.iterkeys():
-            self.list_view.DeleteItem(0)
+        self.list_view.DeleteAllItems()
         self.list_data = {}
+        self.last_index = self.DEFAULT_INDEX
         self.panel.parent.history("Records list is now empty")
 
     def refresh(self):
         self.panel.get_records().flush()
         self.panel.get_records().refresh_records()
+        display_index = 1
         for record in self.panel.get_servers():
-            self.add(record)
+            self.add(record, display_index)
+            display_index += 1
         self.panel.parent.history("Records list is now updated")
 
-    def add(self, record):
-        item = [str(self.index)]
+    def add(self, record, display_index=-1):
+        self.last_index += 1
+        if display_index < 0:
+            display_index = self.last_index+1
+        item = [str(display_index)]
         item.append(record.auth_signature)
         records = self.panel.get_records().get_unlocker()
         item.append(str(record.jump_signature != records.SELF_BOUNCE))
@@ -91,10 +100,9 @@ class ListView(object):
         message = "Added new %s server (%s) ..." % (record.scheme, record.host)
         self.panel.parent.history(message)
         self.add_data(record)
-        self.index += 1
 
     def add_data(self, record):
-        index = self.index  # copy for thread safety
+        index = self.last_index  # copy for thread safety
         self.list_data.update({index: record})
         return index
 
@@ -104,6 +112,12 @@ class ListView(object):
             return
         record = self.list_data[index]
         del self.list_data[index]
+        list_data = self.list_data.copy()
+        self.list_data = {}
+        for idx, data in list_data.iteritems():
+            if idx > index:
+                idx -= 1
+            self.list_data.update({idx: data})
         return record
 
     def remove(self, index):
@@ -111,7 +125,7 @@ class ListView(object):
         record = self.remove_data(index)
         message = "Removed %s server (%s) ..." % (record.scheme, record.host)
         self.panel.parent.history(message)
-        self.index -= 1
+        self.last_index -= 1
 
     def remove_record(self, record):
         for index, each in self.list_data.iteritems():

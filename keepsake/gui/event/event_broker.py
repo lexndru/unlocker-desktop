@@ -62,17 +62,26 @@ class EventBroker(object):
             tb.toolbar.EnableTool(tb.decrypt_records.GetId(), True)
             tb.toolbar.EnableTool(tb.encrypt_records.GetId(), False)
             tb.toolbar.EnableTool(tb.add_record.GetId(), False)
+            tb.toolbar.EnableTool(tb.import_records.GetId(), False)
+            tb.toolbar.EnableTool(tb.export_records.GetId(), False)
             mn.menu_new_server.Enable(False)
             mn.menu_encrypt_records.Enable(False)
             mn.menu_decrypt_records.Enable(True)
+            mn.menu_import_servers.Enable(False)
+            mn.menu_export_any.Enable(False)
+            mn.menu_export_all.Enable(False)
         else:
             tb.toolbar.EnableTool(tb.decrypt_records.GetId(), False)
             tb.toolbar.EnableTool(tb.encrypt_records.GetId(), True)
             tb.toolbar.EnableTool(tb.add_record.GetId(), True)
+            tb.toolbar.EnableTool(tb.import_records.GetId(), True)
+            tb.toolbar.EnableTool(tb.export_records.GetId(), True)
             mn.menu_new_server.Enable(True)
             mn.menu_encrypt_records.Enable(True)
             mn.menu_decrypt_records.Enable(False)
-        panel.get_records().flush()
+            mn.menu_import_servers.Enable(True)
+            mn.menu_export_any.Enable(True)
+            mn.menu_export_all.Enable(True)
         panel.get_list_view().clear()
         panel.get_list_view().refresh()
         panel.get_toolbar().search.SetValue("")
@@ -131,6 +140,7 @@ class EventBroker(object):
             "Delete server", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         if dialog == wx.YES:
             self.panel.get_list_view().remove_record(record)
+            self.panel.get_records().remove_record(record)
 
     def bind_update_button(self, event):
         record = self.panel.get_detail_view().get_record()
@@ -344,10 +354,12 @@ class EventBroker(object):
         pref.Destroy()
 
     def bind_item_selected(self, event):
-        item_id = event.GetItem().GetID()
-        if item_id > 0:
-            record = self.panel.get_list_view().match_record(item_id-1)
-            self.panel.get_detail_view().update(record)
+        item_id = self.panel.get_list_view().get_current_row()
+        if not item_id >= 0:
+            return
+
+        record = self.panel.get_list_view().match_record(item_id)
+        self.panel.get_detail_view().update(record)
 
         # enable toolbar
         tb = self.panel.get_toolbar()
@@ -363,35 +375,83 @@ class EventBroker(object):
         mn.menu_copy_server.Enable(True)
         mn.menu_copy_passkey.Enable(True)
 
+    def bind_clear_search_button(self, event):
+        list_view = self.panel.get_list_view()
+        list_view.clear()
+        list_view.refresh()
 
-    def bind_clear_search_button(self, event): pass
-    def bind_search_button(self, event): pass
-        # search = self.search.GetValue().strip()
-        # if not search:
-        #     return self.bind_clear_search_button(event)
-        # records_list = self.records_list[:]
-        # self.clear_listview()
-        # index = 0
-        # for record in records_list:
-        #     if self.found_record(search, record):
-        #         self.add_listview_item(index, record)
-        #         self.records_list.append(record)
-        #         index += 1
-
+    def bind_search_button(self, event):
+        toolbar = self.panel.get_toolbar()
+        search = toolbar.search.GetValue().strip()
+        if not search:
+            return self.bind_clear_search_button(event)
+        self.panel.get_list_view().clear()
+        for server in self.panel.get_servers():
+            if self.panel.get_records().compare_record(search, server):
+                self.panel.get_list_view().add(server)
 
     def bind_encrypt_button(self, event):
         self.panel.get_list_view().clear()
         self.panel.get_scripts().encrypt()
         self.panel.history("Please refresh list ...")
 
+        # disable toolbar buttons
+        tb = self.panel.get_toolbar()
+        tb.toolbar.EnableTool(tb.connect_server.GetId(), False)
+        tb.toolbar.EnableTool(tb.add_record.GetId(), False)
+        tb.toolbar.EnableTool(tb.remove_record.GetId(), False)
+        tb.toolbar.EnableTool(tb.update_record.GetId(), False)
+        tb.toolbar.EnableTool(tb.import_records.GetId(), False)
+        tb.toolbar.EnableTool(tb.export_records.GetId(), False)
+        tb.toolbar.EnableTool(tb.encrypt_records.GetId(), False)
+        tb.toolbar.EnableTool(tb.decrypt_records.GetId(), True)
+
+        # disable menu options
+        mn = self.panel.get_menu()
+        mn.menu_open_server.Enable(False)
+        mn.menu_new_server.Enable(False)
+        mn.menu_update_server.Enable(False)
+        mn.menu_remove_server.Enable(False)
+        mn.menu_copy_server.Enable(False)
+        mn.menu_copy_passkey.Enable(False)
+        mn.menu_import_servers.Enable(False)
+        mn.menu_export_any.Enable(False)
+        mn.menu_export_all.Enable(False)
+        mn.menu_encrypt_records.Enable(False)
+        mn.menu_decrypt_records.Enable(True)
+
     def bind_decrypt_button(self, event):
         self.panel.get_list_view().clear()
         self.panel.get_scripts().decrypt()
         self.panel.history("Please refresh list ...")
 
+        # disable toolbar buttons
+        tb = self.panel.get_toolbar()
+        tb.toolbar.EnableTool(tb.connect_server.GetId(), False)
+        tb.toolbar.EnableTool(tb.add_record.GetId(), True)
+        tb.toolbar.EnableTool(tb.remove_record.GetId(), False)
+        tb.toolbar.EnableTool(tb.update_record.GetId(), False)
+        tb.toolbar.EnableTool(tb.import_records.GetId(), True)
+        tb.toolbar.EnableTool(tb.export_records.GetId(), True)
+        tb.toolbar.EnableTool(tb.encrypt_records.GetId(), True)
+        tb.toolbar.EnableTool(tb.decrypt_records.GetId(), False)
+
+        # disable menu options
+        mn = self.panel.get_menu()
+        mn.menu_open_server.Enable(False)
+        mn.menu_new_server.Enable(True)
+        mn.menu_update_server.Enable(False)
+        mn.menu_remove_server.Enable(False)
+        mn.menu_copy_server.Enable(False)
+        mn.menu_copy_passkey.Enable(False)
+        mn.menu_import_servers.Enable(True)
+        mn.menu_export_any.Enable(True)
+        mn.menu_export_all.Enable(True)
+        mn.menu_encrypt_records.Enable(True)
+        mn.menu_decrypt_records.Enable(False)
+
     def bind_quit(self, event):
         self.panel.parent.Close()
-
 
     def bind_documentation_menu(self, event):
         webbrowser.open(__homepage__, new=2)

@@ -20,14 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import os
 import wx
-import wx.dataview as dv
-import webbrowser
-
-from wx.lib.wordwrap import wordwrap
-
-from keepsake import __project__, __homepage__, __version__, __license__
 
 from keepsake.gui.event.event_broker import EventBroker
 
@@ -37,10 +30,6 @@ from keepsake.gui.toolbar.toolbar import Toolbar
 
 from keepsake.gui.view.list.list_view import ListView
 from keepsake.gui.view.detail.detail_view import DetailView
-
-from keepsake.gui.dialog.create_server import CreateServerDialog
-from keepsake.gui.dialog.update_server import UpdateServerDialog
-from keepsake.gui.dialog.preferences import PreferencesDialog
 
 from keepsake.gui.misc.records import Records
 from keepsake.gui.misc.scripts import Scripts

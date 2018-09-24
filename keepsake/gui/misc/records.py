@@ -31,6 +31,15 @@ class Records(object):
     _records = None
     _recents = None
 
+    LOOKUP_FIELDS = (
+        "name",
+        "host",
+        "port",
+        "user",
+        "scheme",
+        "auth_signature"
+    )
+
     class Row(object):
 
         @classmethod
@@ -43,6 +52,15 @@ class Records(object):
     def flush(self):
         self._records = {}
         self._recents = []
+
+    def compare_record(self, needle, record):
+        for field in self.LOOKUP_FIELDS:
+            value = getattr(record, field)
+            if isinstance(value, str):
+                value = value.decode("utf-8")
+            if needle in value:
+                return True
+        return False
 
     def has_record(self, record=None, name=None):
         if record is not None and issubclass(record, self.Row):

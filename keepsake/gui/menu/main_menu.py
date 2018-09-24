@@ -64,17 +64,17 @@ class MainMenu(object):
         file_menu.AppendSeparator()
 
         # import servers
-        import_servers = file_menu.Append(wx.ID_ANY, "&Import ...")
+        self.menu_import_servers = file_menu.Append(wx.ID_ANY, "&Import ...")
         self.panel.Bind(wx.EVT_MENU, self.event.bind_import_button,
-                         import_servers)
+                        self.menu_import_servers)
 
         # export servers
-        export_any = file_menu.Append(wx.ID_ANY, "&Export ...")
+        self.menu_export_any = file_menu.Append(wx.ID_ANY, "&Export ...")
         self.panel.Bind(wx.EVT_MENU, self.event.bind_export_any_button,
-                         export_any)
-        export_all = file_menu.Append(wx.ID_ANY, "E&xport all")
+                        self.menu_export_any)
+        self.menu_export_all = file_menu.Append(wx.ID_ANY, "E&xport all")
         self.panel.Bind(wx.EVT_MENU, self.event.bind_export_all_button,
-                         export_all)
+                        self.menu_export_all)
         file_menu.AppendSeparator()
 
         # quit

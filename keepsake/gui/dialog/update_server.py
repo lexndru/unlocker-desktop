@@ -37,7 +37,7 @@ class UpdateServerDialog(wx.Dialog):
         self.panel = parent
         self.dlg = wx.PreDialog()
         self.dlg.SetExtraStyle(wx.DIALOG_EX_CONTEXTHELP)
-        self.dlg.Create(parent, wx.ID_ANY, "Update authentication on server",
+        self.dlg.Create(parent, wx.ID_ANY, "Update server",
                         pos=wx.DefaultPosition, size=(300, 200),
                         style=wx.DEFAULT_DIALOG_STYLE)
         self.PostCreate(self.dlg)
