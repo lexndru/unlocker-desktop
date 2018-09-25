@@ -489,3 +489,6 @@ class EventBroker(object):
         about.License = wordwrap("\n\n".join(license), 500,
                                  wx.ClientDC(self.panel))
         wx.AboutBox(about)
+
+    def bind_table_column_sort(self, event):
+        pass

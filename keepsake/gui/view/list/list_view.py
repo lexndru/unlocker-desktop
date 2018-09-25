@@ -64,6 +64,8 @@ class ListView(object):
                             self.event.bind_connect_button)
         self.list_view.Bind(dv.EVT_DATAVIEW_ITEM_CONTEXT_MENU,
                             self.event.bind_context_menu)
+        self.list_view.Bind(dv.EVT_DATAVIEW_COLUMN_HEADER_CLICK,
+                            self.event.bind_table_column_sort)
 
     def get_current_row(self):
         return self.list_view.GetSelectedRow()
