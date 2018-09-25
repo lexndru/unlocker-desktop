@@ -22,6 +22,8 @@
 
 import wx
 
+from keepsake.unlocker import Unlocker
+
 
 class PreferencesDialog(wx.Dialog):
 
@@ -30,21 +32,22 @@ class PreferencesDialog(wx.Dialog):
     ]
 
     terminals = [
-        "XTerm",
-        "GNOME Terminal",
-        "Konsole",
-        "Terminator",
-        "Guake",
-        "Tilda",
+        ("XTerm", "xterm -e '%s'"),
+        ("GNOME Terminal", "gnome-terminal -e '%s'"),
+        ("Konsole", "konsole -e '%s'"),
+        ("Terminator", "terminator -e '%s'"),
+        ("Guake", "guake -e '%s'"),
+        ("Tilda", "tilda -e '%s'"),
     ]
 
     shells = [
-        "sh",
-        "bash",
-        "tcsh",
-        "ksh",
-        "csh",
-        "zsh",
+        ("sh", "sh -c '%s'"),
+        ("bash", "bash -c '%s'"),
+        ("dash", "dash -c '%s'"),
+        ("tcsh", "tcsh -c '%s'"),
+        ("ksh", "ksh -c '%s'"),
+        ("csh", "csh -c '%s'"),
+        ("zsh", "zsh -c '%s'"),
     ]
 
     def __init__(self, panel):
@@ -69,23 +72,25 @@ class PreferencesDialog(wx.Dialog):
         sizer.Add(row, 0,  wx.ALL, 5)
 
         # terminal
+        terminals_list = [i[0] for i in self.terminals]
         terminal_label = wx.StaticText(self, -1, "Terminal:", size=(100, -1))
-        terminal = wx.Choice(
-            self, wx.ID_ANY, choices=self.terminals, size=(200, -1))
-        terminal.SetSelection(1)
+        self.terminal = wx.Choice(
+            self, wx.ID_ANY, choices=terminals_list, size=(200, -1))
+        self.terminal.SetSelection(self.find_active_terminal_option())
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(terminal_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        row.Add(terminal, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        row.Add(self.terminal, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
         sizer.Add(row, 0,  wx.ALL, 5)
 
         # shell
+        shells_list = [i[0] for i in self.shells]
         shell_label = wx.StaticText(self, -1, "Shell:", size=(100, -1))
-        shell = wx.Choice(
-            self, wx.ID_ANY, choices=self.shells, size=(200, -1))
-        shell.SetSelection(1)
+        self.shell = wx.Choice(
+            self, wx.ID_ANY, choices=shells_list, size=(200, -1))
+        self.shell.SetSelection(self.find_active_shell_option())
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(shell_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
-        row.Add(shell, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
+        row.Add(self.shell, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
         sizer.Add(row, 0, wx.ALL, 5)
 
         # buttons sizer
@@ -107,3 +112,48 @@ class PreferencesDialog(wx.Dialog):
         # render dialog
         self.SetSizer(sizer)
         sizer.Fit(self)
+
+    def find_active_shell_option(self):
+        return self.find_preselected_option(self.shells, Unlocker.SHELL)
+
+    def find_active_terminal_option(self):
+        return self.find_preselected_option(self.terminals, Unlocker.TERMINAL)
+
+    def find_preselected_option(self, options, active):
+        for index, row in enumerate(options):
+            _, cmd = row
+            if active == cmd:
+                return index
+        if len(options) > 0:
+            return 1
+        return 0
+
+    def get_shell(self):
+        return self.read_shell_by_index(self.shell.GetSelection())
+
+    def read_shell_by_index(self, index):
+        if not isinstance(index, int) or index >= len(self.shells):
+            error_msg = "Unable to find shell. Either it's missing from " \
+                        "the configuration file or a selection error occurred."
+            dlg = wx.MessageDialog(
+                self, error_msg, "Error", wx.OK | wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+        _, cmd = self.shells[index]
+        return cmd
+
+    def get_terminal(self):
+        return self.read_terminal_by_index(self.terminal.GetSelection())
+
+    def read_terminal_by_index(self, index):
+        if not isinstance(index, int) or index >= len(self.terminals):
+            error_msg = "Unable to find terminal. Either it's missing from " \
+                        "the configuration file or a selection error occurred."
+            dlg = wx.MessageDialog(
+                self, error_msg, "Error", wx.OK | wx.ICON_ERROR)
+            dlg.ShowModal()
+            dlg.Destroy()
+            return
+        _, cmd = self.terminals[index]
+        return cmd

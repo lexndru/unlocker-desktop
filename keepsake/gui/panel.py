@@ -22,6 +22,7 @@
 
 import wx
 
+from keepsake.gui.event.welcome import WelcomeEvent
 from keepsake.gui.event.event_broker import EventBroker
 
 from keepsake.gui.menu.main_menu import MainMenu
@@ -49,6 +50,9 @@ class CredentialsPanel(wx.Panel):
         super(self.__class__, self).__init__(parent=parent)
         self.parent = parent
         self.check_boot_alerts() and self.trigger_boot_alerts()
+        if self.bootloader.first_run:
+            we = WelcomeEvent(self)
+            we.display_preferences()
         self.event_broker = self.init_live_events()
         self.toolbar = self.init_toolbar()
         self.scripts = self.init_scripts()

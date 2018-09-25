@@ -24,14 +24,12 @@ from distutils import spawn
 from os import path, makedirs
 from os.path import expanduser
 
-from keepsake import __version__
+from keepsake.util.settings import Settings
 
 from keepsake.unlocker import Unlocker
 
 
 class Boot(object):
-
-    SETTINGS_FIELDS = 3  # version, shell and terminal
 
     def __init__(self):
         self.keepsake_status = False
@@ -39,39 +37,19 @@ class Boot(object):
         self.unlocker_scripts = False
         self.secrets_status = False
         self.secrets_encryption = False
+        self.first_run = False
         self.check_settings()
 
     def __repr__(self):
         return str({k: v for k, v in self.__dict__.iteritems() if k[0] != "_"})
 
-    def read_settings(self, settings, dirname):
-        settings_path = path.join(expanduser("~"), dirname)
-        with open(path.join(settings_path, settings), "r") as fd:
-            data = [__version__, Unlocker.SHELL, Unlocker.TERMINAL]
-            _, shell, terminal = fd.read().split("\n", self.SETTINGS_FIELDS)
-            return True, shell, terminal
-        return False, "", ""
-
-    def create_settings(self, settings, dirname):
-        settings_path = path.join(expanduser("~"), dirname)
-        makedirs(settings_path)
-        with open(path.join(settings_path, settings), "w") as fd:
-            data = [__version__, Unlocker.SHELL, Unlocker.TERMINAL]
-            if len(data) != self.SETTINGS_FIELDS:
-                raise SystemExit("Incorrect number of settings fields")
-            fd.write("\n".join(data))
-            return True, Unlocker.SHELL, Unlocker.TERMINAL
-        return False, "", ""
-
-    def check_settings(self, settings="settings", dirname=".keepsake"):
-        if not self.has_file(settings, dirname):
-            ok, _, _ = self.create_settings(settings, dirname)
-            if not ok:
-                raise SystemExit("Cannot create local settings. Closing...")
-        ok, Unlocker.SHELL, Unlocker.TERMINAL = self.read_settings(
-                                                    settings, dirname)
-        if not ok:
-            raise SystemExit("Cannot access local settings. Closing...")
+    def check_settings(self):
+        sett = Settings()
+        if sett.read_or_init():
+            Unlocker.SHELL = sett.unlocker_shell
+            Unlocker.TERMINAL = sett.unlocker_terminal
+        else:
+            self.first_run = True
 
     def check_system(self):
         self.keepsake_status = self.is_installed("keepsake-unlock")

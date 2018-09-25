@@ -22,12 +22,15 @@
 
 import wx
 import os
-# import thread
 import webbrowser
 
 from wx.lib.wordwrap import wordwrap
 
 from keepsake import __homepage__, __version__, __license__
+
+from keepsake.unlocker import Unlocker
+
+from keepsake.util.settings import Settings
 
 from keepsake.gui.misc.scripts import Scripts
 
@@ -345,9 +348,15 @@ class EventBroker(object):
         pref.CenterOnScreen()
         val = pref.ShowModal()
         if val == wx.ID_OK:
+            sett = Settings()
+            sett.update(pref.get_shell(), pref.get_terminal())
+            Unlocker.SHELL = pref.get_shell()
+            Unlocker.TERMINAL = pref.get_terminal()
             style = wx.PD_APP_MODAL | wx.PD_AUTO_HIDE
-            dlg = wx.ProgressDialog("Please wait", "Saving preferences...",
-                                    maximum=5, parent=self, style=style)
+            title = "Please wait"
+            message = "Saving preferences..."
+            dlg = wx.ProgressDialog(
+                title, message, maximum=5, parent=pref, style=style)
             wx.MilliSleep(250)  # dummy
             wx.Yield()
             dlg.Destroy()
