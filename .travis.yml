@@ -14,6 +14,7 @@ before_install:
   - sudo apt-get install libjpeg-dev libtiff-dev libsdl1.2-dev libwebkitgtk-3.0-dev
   - sudo apt-get install libgstreamer-plugins-base1.0-dev libnotify-dev freeglut3
   - sudo apt-get install freeglut3-dev libsm-dev libxtst-dev
+  - sudo pip install flake8
 
 install:
   - sudo make install
