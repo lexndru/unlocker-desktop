@@ -9,10 +9,11 @@ git:
   depth: 3
 
 before_install:
-  - wget http://security.ubuntu.com/ubuntu/pool/main/i/icu/libicu55_55.1-7ubuntu0.4_amd64.deb
-  - sudo apt install ./libicu55_55.1-7ubuntu0.4_amd64.deb
   - echo "deb http://ro.archive.ubuntu.com/ubuntu/ xenial universe" | sudo tee -a /etc/apt/sources.list
   - sudo apt-get update
+  - sudo apt-get install -y libstdc++6
+  - wget http://security.ubuntu.com/ubuntu/pool/main/i/icu/libicu55_55.1-7ubuntu0.4_amd64.deb
+  - sudo apt install ./libicu55_55.1-7ubuntu0.4_amd64.deb
   - sudo apt-get install -y
         build-essential
         dpkg-dev
@@ -29,8 +30,6 @@ before_install:
         libcairo2
         libfontconfig1
         libgstreamer1.0-0
-        libicu55
-        libstdc++6
         libwebp5
         libwebkitgtk-3.0-0
         libwebkitgtk-3.0-dev
