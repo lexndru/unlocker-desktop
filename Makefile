@@ -26,7 +26,10 @@ tests:
 
 install: tests lint
 	python setup.py install
+	unlocker init
+	unlocker install 2> /dev/null
 	keepsake fix
+	cp Desktop /usr/share/applications/$(SRC_DIR).desktop
 
 launch: tests
 	python $(SRC_DIR).py

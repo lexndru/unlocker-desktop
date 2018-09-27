@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Keepsake Desktop
+Comment=Unlocker GUI frontend
+TryExec=keepsake
+Exec=keepsake
+StartupNotify=true
+Terminal=false
+Type=Application
+Icon=/usr/local/lib/python2.7/dist-packages/keepsake/icons/app-icon.png
+NoDisplay=false
+MimeType=applications/python

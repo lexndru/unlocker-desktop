@@ -37,7 +37,6 @@ setup(name="keepsake",
     },
     install_requires=[
         "unlocker==2.2.0",
-        "wxPython==4.0.3"
     ],
     test_suite="tests",
     version=__version__,
