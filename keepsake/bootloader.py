@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 
 from distutils import spawn
-from os import path, makedirs
+from os import path
 from os.path import expanduser
 
 from keepsake.util.settings import Settings

@@ -52,7 +52,7 @@ class MainMenu(object):
             wx.ID_ANY, "&Open connection\tCtrl-O")
         self.menu_open_server.Enable(False)
         self.panel.Bind(wx.EVT_MENU, self.event.bind_connect_button,
-                         self.menu_open_server)
+                        self.menu_open_server)
 
         # add server
         self.menu_new_server = file_menu.Append(
@@ -111,38 +111,38 @@ class MainMenu(object):
         self.menu_copy_server = edit_menu.Append(wx.ID_ANY, "Copy server")
         self.menu_copy_server.Enable(False)
         self.panel.Bind(wx.EVT_MENU, self.event.bind_copy_fields_menu,
-                         self.menu_copy_server)
+                        self.menu_copy_server)
 
         # copy passkey
         self.menu_copy_passkey = edit_menu.Append(wx.ID_ANY, "Copy secret")
         self.menu_copy_passkey.Enable(False)
         self.panel.Bind(wx.EVT_MENU, self.event.bind_copy_passkey_menu,
-                         self.menu_copy_passkey)
+                        self.menu_copy_passkey)
         edit_menu.AppendSeparator()
 
         # update selected
         self.menu_update_server = edit_menu.Append(wx.ID_ANY, "Update server")
         self.menu_update_server.Enable(False)
         self.panel.Bind(wx.EVT_MENU, self.event.bind_update_button,
-                         self.menu_update_server)
+                        self.menu_update_server)
 
         # remove selected
         self.menu_remove_server = edit_menu.Append(wx.ID_ANY, "Delete server")
         self.menu_remove_server.Enable(False)
         self.panel.Bind(wx.EVT_MENU, self.event.bind_remove_button,
-                         self.menu_remove_server)
+                        self.menu_remove_server)
         edit_menu.AppendSeparator()
 
         # refresh
         refresh_list = edit_menu.Append(wx.ID_ANY, "Refresh ...\tCtrl-R")
         self.panel.Bind(wx.EVT_MENU, self.event.bind_refresh_button,
-                         refresh_list)
+                        refresh_list)
         edit_menu.AppendSeparator()
 
         # preferences
         preferences = edit_menu.Append(wx.ID_ANY, "Preferences\tCtrl-P")
         self.panel.Bind(wx.EVT_MENU, self.event.bind_preferences_button,
-                         preferences)
+                        preferences)
 
         return edit_menu
 
@@ -155,7 +155,7 @@ class MainMenu(object):
         if self.bootloader.secrets_encryption:
             self.menu_encrypt_records.Enable(False)
         self.panel.Bind(wx.EVT_MENU, self.event.bind_encrypt_button,
-                         self.menu_encrypt_records)
+                        self.menu_encrypt_records)
 
         # decrypt records
         self.menu_decrypt_records = tool_menu.Append(
@@ -163,7 +163,7 @@ class MainMenu(object):
         if not self.bootloader.secrets_encryption:
             self.menu_decrypt_records.Enable(False)
         self.panel.Bind(wx.EVT_MENU, self.event.bind_decrypt_button,
-                         self.menu_decrypt_records)
+                        self.menu_decrypt_records)
 
         return tool_menu
 
@@ -178,6 +178,6 @@ class MainMenu(object):
         # online documentation
         documentation = help_menu.Append(wx.ID_ANY, "Online documentation")
         self.panel.Bind(wx.EVT_MENU, self.event.bind_documentation_menu,
-                         documentation)
+                        documentation)
 
         return help_menu

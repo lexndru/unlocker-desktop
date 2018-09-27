@@ -32,8 +32,6 @@ from keepsake.unlocker import Unlocker
 
 from keepsake.util.settings import Settings
 
-from keepsake.gui.misc.scripts import Scripts
-
 from keepsake.gui.dialog.create_server import CreateServerDialog
 from keepsake.gui.dialog.update_server import UpdateServerDialog
 from keepsake.gui.dialog.preferences import PreferencesDialog
@@ -138,7 +136,7 @@ class EventBroker(object):
     def bind_remove_button(self, event):
         record = self.panel.get_detail_view().get_record()
         dialog = wx.MessageBox(
-            "Are you sure you want to permanently " \
+            "Are you sure you want to permanently "
             "remove server %s?" % record.name,
             "Delete server", wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         if dialog == wx.YES:
@@ -185,7 +183,7 @@ class EventBroker(object):
 
     def export_callback(self, export_servers):
         dialog = wx.MessageBox(
-            "Preparing to export %d selected server(s).\nDo you " \
+            "Preparing to export %d selected server(s).\nDo you "
             "want to save the export to disk?" % len(export_servers),
             "Export servers", wx.YES_NO | wx.YES_DEFAULT | wx.ICON_QUESTION)
         if dialog != wx.YES or len(export_servers) == 0:
@@ -197,7 +195,7 @@ class EventBroker(object):
         message = ""
         if dlg.ShowModal() == wx.ID_OK:
             filepath = dlg.GetPath()
-            if not "." in filepath:
+            if "." not in filepath:
                 filepath += ".unl"
             servers_names = [s.name for s in export_servers]
             try:
@@ -239,8 +237,8 @@ class EventBroker(object):
                 missing_jumps.append(each)
         if len(missing_jumps) > 0:
             dialog = wx.MessageBox(
-                "You have selected servers that bounce from other " \
-                "servers. Do you want to append jump servers as well " \
+                "You have selected servers that bounce from other "
+                "servers. Do you want to append jump servers as well "
                 "in the final export?",
                 "Export servers", wx.YES_NO | wx.ICON_INFORMATION)
             if dialog == wx.YES:
@@ -254,7 +252,7 @@ class EventBroker(object):
                     missing_jumps.remove(each)
                 if len(missing_jumps) != 0:
                     dialog = wx.MessageBox(
-                        "Unable to find jump servers. " \
+                        "Unable to find jump servers. "
                         "Export might be corrupted.",
                         "Export fix failed", wx.OK | wx.ICON_INFORMATION)
         self.export_callback(export_servers)
@@ -324,7 +322,8 @@ class EventBroker(object):
         self.panel.Bind(wx.EVT_MENU, self.on_context_copy_name, copy_name)
         self.panel.Bind(wx.EVT_MENU, self.on_context_copy_host, copy_host)
         self.panel.Bind(wx.EVT_MENU, self.on_context_copy_user, copy_user)
-        self.panel.Bind(wx.EVT_MENU, self.on_context_copy_passkey, copy_passkey)
+        self.panel.Bind(
+            wx.EVT_MENU, self.on_context_copy_passkey, copy_passkey)
         self.panel.PopupMenu(menu)
 
     def on_context_copy_name(self, event):

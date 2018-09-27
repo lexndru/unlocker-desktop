@@ -1,9 +1,9 @@
 CWD=$(shell pwd)
 SRC_DIR=keepsake
 
-.PHONY: all clean build lint tests
+.PHONY: all clean build lint tests install
 
-all: clean lint build
+all: clean lint launch
 
 build: lint tests
 	cd /tmp && virtualenv $(SRC_DIR) && cd $(SRC_DIR)
@@ -12,7 +12,7 @@ build: lint tests
 
 clean:
 	find . -regextype posix-extended -regex ".*.pyc" -type f -delete
-	rm -rf /tmp/$(SRC_DIR)
+	rm -rf /tmp/$(SRC_DIR) 2> /dev/null
 
 release: build
 	cd /tmp/$(SRC_DIR)/$(SRC_DIR) && python setup.py sdist
@@ -24,6 +24,9 @@ lint:
 tests:
 	python -m unittest discover -v tests
 
-install: lint
+install: tests lint
 	python setup.py install
 	keepsake fix
+
+launch: tests
+	python $(SRC_DIR).py
