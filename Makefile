@@ -1,7 +1,7 @@
 CWD=$(shell pwd)
 SRC_DIR=keepsake
 
-.PHONY: all clean build lint tests install
+.PHONY: all clean build lint tests install docker sandbox travis
 
 all: clean lint launch
 
@@ -33,3 +33,12 @@ install: tests lint
 
 launch: tests
 	python $(SRC_DIR).py
+
+docker:
+	docker build -t $(SRC_DIR) .
+
+sandbox:
+	docker run -it -v $(CWD):/opt/$(SRC_DIR) -w /opt/$(SRC_DIR) --rm --name $(SRC_DIR) $(SRC_DIR) sh
+
+travis:
+	docker pull travisci/ci-garnet
