@@ -18,7 +18,7 @@ before_install:
         build-essential libwxgtk3.0-dev python python-dev
         python-pip python-virtualenv python-gdbm
         python-wxgtk3.0 python-wxgtk3.0-dev xvfb
-  - sudo pip install flake8 unlocker
+  - sudo pip install flake8 unlocker xvfbwrapper
   - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
