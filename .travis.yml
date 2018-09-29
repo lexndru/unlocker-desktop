@@ -24,10 +24,10 @@ before_install:
   - sudo pip install flake8 unlocker
 
 install:
-  - Xfvb :99 &
   - sudo python setup.py install
   - unlocker init && unlocker install
 
 script:
+  - Xfvb :99 &
   - keepsake fix
   - keepsake
