@@ -28,6 +28,5 @@ install:
   - unlocker init && unlocker install
 
 script:
-  - Xfvb :99 &
-  - keepsake fix
-  - keepsake
+  - xvfb-run keepsake fix
+  - xvfb-run keepsake
