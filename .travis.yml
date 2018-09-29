@@ -25,6 +25,7 @@ before_install:
 
 install:
   - Xfvb :99 &
+  - env
   - dpkg -l
   - pip list
   - sudo make install
