@@ -38,7 +38,7 @@ docker:
 	docker build -t $(SRC_DIR) .
 
 sandbox:
-	docker run -it -v $(CWD):/opt/$(SRC_DIR) -w /opt/$(SRC_DIR) --rm --name $(SRC_DIR) $(SRC_DIR) sh
+	docker run -it -v $(CWD):/opt/$(SRC_DIR) -w /opt/$(SRC_DIR) --rm --name $(SRC_DIR) $(SRC_DIR) bash
 
 travis:
 	docker pull travisci/ci-garnet
