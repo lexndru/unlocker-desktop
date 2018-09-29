@@ -42,9 +42,7 @@ class DesktopThread(Thread):
         boot = Boot()
         boot.check_system()
         CredentialsPanel.register_boot(boot)
-        print "around here"
         self.app = SingleMainWindow(CredentialsPanel)
-        print "finally here %r" % self.app
         DesktopApp.run()
 
 

@@ -19,11 +19,19 @@ before_install:
         python-pip python-virtualenv python-gdbm
         python-wxgtk3.0 python-wxgtk3.0-dev xvfb
   - sudo pip install flake8 unlocker
+  - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
 
 install:
   - sudo python setup.py install
   - unlocker init && unlocker install
   - python -c "import keepsake.util.misc as u; u.deploy_helper_script()"
+  - conda install -c https://conda.anaconda.org/travis wxpython
 
 script:
   - make tests
