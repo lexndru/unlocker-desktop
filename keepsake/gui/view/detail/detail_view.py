@@ -51,7 +51,7 @@ class DetailView(object):
                                size=(100, -1), style=wx.ALIGN_RIGHT)
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(static)
-        row.Add((0, 0), proportion=1)
+        row.Add((10, 10), proportion=1)
         self.detail_record_name = wx.StaticText(
             self.panel, wx.ID_ANY, "n/a", size=(200, -1))
         row.Add(self.detail_record_name)
@@ -62,7 +62,7 @@ class DetailView(object):
                                size=(100, -1), style=wx.ALIGN_RIGHT)
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(static)
-        row.Add((0, 0), proportion=1)
+        row.Add((10, 10), proportion=1)
         self.detail_record_hash = wx.StaticText(
             self.panel, wx.ID_ANY, "n/a", size=(200, -1))
         row.Add(self.detail_record_hash)
@@ -73,7 +73,7 @@ class DetailView(object):
                                size=(100, -1), style=wx.ALIGN_RIGHT)
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(static)
-        row.Add((0, 0), proportion=1)
+        row.Add((10, 10), proportion=1)
         self.detail_record_jump = wx.StaticText(
             self.panel, wx.ID_ANY, "n/a", size=(200, -1))
         row.Add(self.detail_record_jump)
@@ -84,7 +84,7 @@ class DetailView(object):
                                size=(100, -1), style=wx.ALIGN_RIGHT)
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(static)
-        row.Add((0, 0), proportion=1)
+        row.Add((10, 10), proportion=1)
         self.detail_connection_protocol = wx.StaticText(
             self.panel, wx.ID_ANY, "n/a", size=(400, -1))
         row.Add(self.detail_connection_protocol)
@@ -95,7 +95,7 @@ class DetailView(object):
                                size=(100, -1), style=wx.ALIGN_RIGHT)
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(static)
-        row.Add((0, 0), proportion=1)
+        row.Add((10, 10), proportion=1)
         self.detail_connection_hostname = wx.StaticText(
             self.panel, wx.ID_ANY, "n/a", size=(400, -1))
         row.Add(self.detail_connection_hostname)
@@ -106,7 +106,7 @@ class DetailView(object):
                                size=(100, -1), style=wx.ALIGN_RIGHT)
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(static)
-        row.Add((0, 0), proportion=1)
+        row.Add((10, 10), proportion=1)
         self.detail_connection_username = wx.StaticText(
             self.panel, wx.ID_ANY, "n/a", size=(400, -1))
         row.Add(self.detail_connection_username)

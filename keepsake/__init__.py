@@ -27,7 +27,7 @@ from os import path
 __project__ = path.dirname(path.abspath(__file__))
 
 # current project version
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # project homepage
 __homepage__ = r"https://github.com/lexndru/unlocker-desktop"
