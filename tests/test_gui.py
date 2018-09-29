@@ -25,6 +25,7 @@ import random
 
 from unittest import TestCase
 from threading import Thread
+from xvfbwrapper import Xvfb
 
 from keepsake.bootloader import Boot
 
@@ -41,28 +42,32 @@ class DesktopThread(Thread):
         boot = Boot()
         boot.check_system()
         CredentialsPanel.register_boot(boot)
+        print "around here"
         self.app = SingleMainWindow(CredentialsPanel)
+        print "finally here %r" % self.app
         DesktopApp.run()
 
 
 class TestGUIApp(TestCase):
 
     gui = None
+    display = Xvfb()
 
     def setUp(self):
         print "Opening ..."
-        with self.assertRaises(Exception) as context:
-            self.gui = DesktopThread(name="keepsake test gui")
-            self.gui.start()
-            self.assertTrue(context.exception is None)
+        self.display.start()
+        self.gui = DesktopThread(name="keepsake test gui")
+        self.gui.start()
         print "Running ..."
 
     def tearDown(self):
         print "Closing ..."
+        self.assertIsNotNone(self.gui.app)
         self.gui.app.Close()
+        self.display.stop()
         print "Closed"
 
     def test_gui_app(self):
-        print "Waiting 3 seconds ..."
-        time.sleep(3)  # wait a few seconds before closing
+        print "Waiting 5 seconds ..."
+        time.sleep(5)  # wait a few seconds before closing
         print "Done waiting"

@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y software-properties-common python-softw
 	rm -rf /var/lib/apt/lists/*
 
 # install unlocker and initialize
-RUN pip install flake8 unlocker && unlocker init && unlocker install
+RUN pip install flake8 unlocker xvfbwrapper && unlocker init && unlocker install
 
 # run in debug mode
 ENV DEBUG true
