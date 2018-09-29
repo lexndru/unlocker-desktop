@@ -27,3 +27,6 @@ install:
 
 script:
   - make tests
+  - env
+  - dpkg -l
+  - pip list
